@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>24点游戏</title>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- 统一的 Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#f97316',
+            secondary: '#fb923c',
+            accent: '#fdba74',
+            neutral: '#fff7ed',
+            'neutral-dark': '#f87171'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .number-card {
+        transition: all 0.3s ease;
+      }
+      .number-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px -5px rgba(249, 115, 22, 0.4);
+      }
+      .operator-btn {
+        transition: all 0.2s ease;
+      }
+      .operator-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.3);
+      }
+      .operator-btn:active {
+        transform: scale(0.98);
+      }
+      .btn-primary {
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px -3px rgba(249, 115, 22, 0.4);
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-neutral to-accent/20 flex flex-col items-center justify-start p-4">
+  
+  <!-- 游戏容器 -->
+  <div class="w-full max-w-3xl flex flex-col items-center">
+    
+    <!-- 游戏标题 -->
+    <div class="my-6 text-center">
+      <h1 class="text-4xl font-bold text-primary">24点游戏</h1>
+      <p class="text-gray-600 mt-2">用4个数字和加减乘除括号得到24</p>
+    </div>
+    
+    <!-- 游戏信息栏 -->
+    <div class="w-full flex justify-between items-center mb-6 bg-white rounded-xl p-4 shadow-md">
+      <!-- 计时器 -->
+      <div class="flex items-center space-x-2">
+        <span class="text-primary font-medium">用时:</span>
+        <span id="timer" class="text-primary font-bold text-xl">00:00</span>
+      </div>
+      
+      <!-- 游戏控制 -->
+      <div class="flex items-center space-x-3">
+        <button id="new-game" class="bg-primary hover:bg-primary/90 text-white rounded-lg px-4 py-2 flex items-center space-x-2 btn-primary">
+          <i class="fa fa-refresh"></i>
+          <span>新游戏</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 数字卡片区域 -->
+    <div class="w-full grid grid-cols-4 gap-4 mb-8">
+      <div id="card-0" class="number-card h-32 bg-white rounded-xl flex items-center justify-center text-5xl font-bold text-primary shadow-md cursor-pointer">
+        <span class="number">0</span>
+      </div>
+      <div id="card-1" class="number-card h-32 bg-white rounded-xl flex items-center justify-center text-5xl font-bold text-primary shadow-md cursor-pointer">
+        <span class="number">0</span>
+      </div>
+      <div id="card-2" class="number-card h-32 bg-white rounded-xl flex items-center justify-center text-5xl font-bold text-primary shadow-md cursor-pointer">
+        <span class="number">0</span>
+      </div>
+      <div id="card-3" class="number-card h-32 bg-white rounded-xl flex items-center justify-center text-5xl font-bold text-primary shadow-md cursor-pointer">
+        <span class="number">0</span>
+      </div>
+    </div>
+    
+    <!-- 表达式显示区域 -->
+    <div class="w-full bg-white rounded-xl p-6 mb-6 min-h-[100px] flex items-center justify-center shadow-md">
+      <div id="expression" class="text-3xl font-bold text-primary min-h-[60px] flex items-center justify-center">
+        请选择数字和运算符
+      </div>
+    </div>
+    
+    <!-- 所有操作按钮放在同一排 -->
+    <div class="w-full grid grid-cols-7 gap-3 mb-8">
+      <button class="operator-btn h-16 bg-white rounded-xl flex items-center justify-center text-2xl font-bold text-primary shadow-md hover:bg-accent/20" data-operator="(">(</button>
+      <button class="operator-btn h-16 bg-white rounded-xl flex items-center justify-center text-2xl font-bold text-primary shadow-md hover:bg-accent/20" data-operator=")">)</button>
+      <button class="operator-btn h-16 bg-white rounded-xl flex items-center justify-center text-3xl font-bold text-primary shadow-md hover:bg-accent/20" data-operator="+">+</button>
+      <button class="operator-btn h-16 bg-white rounded-xl flex items-center justify-center text-3xl font-bold text-primary shadow-md hover:bg-accent/20" data-operator="-">-</button>
+      <button class="operator-btn h-16 bg-white rounded-xl flex items-center justify-center text-3xl font-bold text-primary shadow-md hover:bg-accent/20" data-operator="×">×</button>
+      <button class="operator-btn h-16 bg-white rounded-xl flex items-center justify-center text-3xl font-bold text-primary shadow-md hover:bg-accent/20" data-operator="÷">÷</button>
+      <button id="clear-btn" class="operator-btn h-16 bg-white rounded-xl flex items-center justify-center text-xl font-bold text-primary shadow-md hover:bg-red-100 hover:text-red-500">
+        <i class="fa fa-eraser mr-1"></i> 清除
+      </button>
+    </div>
+    
+    <!-- 提交按钮 -->
+    <div class="w-full flex justify-center mb-8">
+      <button id="submit-btn" class="bg-secondary hover:bg-primary text-white rounded-xl px-8 py-4 text-2xl font-bold shadow-md btn-primary flex items-center space-x-2">
+        <i class="fa fa-check-circle"></i>
+        <span>验证结果</span>
+      </button>
+    </div>
+    
+    <!-- 消息提示区域 -->
+    <div id="message" class="w-full rounded-xl p-6 mb-8 text-center hidden">
+      <div id="message-content" class="text-2xl font-bold"></div>
+      <div id="solution" class="mt-4 text-lg text-primary hidden"></div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="w-full flex justify-center items-center mt-auto py-4 text-gray-600">
+      <div>24点游戏 &copy; 2025</div>
+    </div>
+  </div>
+
+  <script>
+    // 游戏状态
+    const gameState = {
+      numbers: [],
+      usedNumbers: [],
+      expression: [],
+      parenthesesCount: 0, // 跟踪括号数量，确保括号匹配
+      timer: null,
+      seconds: 0,
+      gameStarted: false
+    };
+
+    // DOM元素
+    const elements = {
+      numberCards: document.querySelectorAll('.number-card'),
+      expression: document.getElementById('expression'),
+      operatorBtns: document.querySelectorAll('[data-operator]'),
+      clearBtn: document.getElementById('clear-btn'),
+      submitBtn: document.getElementById('submit-btn'),
+      newGameBtn: document.getElementById('new-game'),
+      timer: document.getElementById('timer'),
+      message: document.getElementById('message'),
+      messageContent: document.getElementById('message-content'),
+      solution: document.getElementById('solution')
+    };
+
+    // 初始化游戏
+    function initGame() {
+      // 生成新游戏
+      newGame();
+      
+      // 添加事件监听器
+      addEventListeners();
+    }
+
+    // 生成新游戏
+    function newGame() {
+      // 重置游戏状态
+      gameState.numbers = [];
+      gameState.usedNumbers = [];
+      gameState.expression = [];
+      gameState.parenthesesCount = 0;
+      
+      // 停止计时器
+      stopTimer();
+      gameState.seconds = 0;
+      updateTimerDisplay();
+      
+      // 隐藏消息
+      elements.message.classList.add('hidden');
+      
+      // 生成4个随机数字
+      generateNumbers();
+      
+      // 更新UI
+      updateNumberCards();
+      updateExpressionDisplay();
+      
+      // 开始计时
+      startTimer();
+      
+      // 标记游戏已开始
+      gameState.gameStarted = true;
+    }
+
+    // 生成4个随机数字
+    function generateNumbers() {
+      const min = 1;
+      const max = 13;
+      
+      // 生成4个随机数字
+      for (let i = 0; i < 4; i++) {
+        const num = Math.floor(Math.random() * (max - min + 1)) + min;
+        gameState.numbers.push(num);
+      }
+      
+      // 检查是否有解，如果没有则重新生成
+      if (!hasSolution(gameState.numbers)) {
+        gameState.numbers = [];
+        generateNumbers();
+      }
+    }
+
+    // 检查4个数字是否有解
+    function hasSolution(numbers) {
+      // 生成所有可能的运算符组合
+      const operators = ['+', '-', '*', '/'];
+      const operatorCombinations = [];
+      
+      // 生成所有3个运算符的组合（4个数字需要3个运算符）
+      for (let o1 of operators) {
+        for (let o2 of operators) {
+          for (let o3 of operators) {
+            operatorCombinations.push([o1, o2, o3]);
+          }
+        }
+      }
+      
+      // 生成所有可能的数字排列
+      const numberPermutations = permute(numbers);
+      
+      // 检查所有可能的组合
+      for (let nums of numberPermutations) {
+        for (let ops of operatorCombinations) {
+          // 检查所有可能的运算顺序（括号的影响）
+          
+          // 情况1: ((a op1 b) op2 c) op3 d
+          let result1 = calculate(nums[0], nums[1], ops[0]);
+          if (result1 === null) continue;
+          result1 = calculate(result1, nums[2], ops[1]);
+          if (result1 === null) continue;
+          result1 = calculate(result1, nums[3], ops[2]);
+          if (result1 !== null && Math.abs(result1 - 24) < 0.001) {
+            return true;
+          }
+          
+          // 情况2: (a op1 (b op2 c)) op3 d
+          let result2 = calculate(nums[1], nums[2], ops[1]);
+          if (result2 === null) continue;
+          result2 = calculate(nums[0], result2, ops[0]);
+          if (result2 === null) continue;
+          result2 = calculate(result2, nums[3], ops[2]);
+          if (result2 !== null && Math.abs(result2 - 24) < 0.001) {
+            return true;
+          }
+          
+          // 情况3: a op1 ((b op2 c) op3 d)
+          let result3 = calculate(nums[1], nums[2], ops[1]);
+          if (result3 === null) continue;
+          result3 = calculate(result3, nums[3], ops[2]);
+          if (result3 === null) continue;
+          result3 = calculate(nums[0], result3, ops[0]);
+          if (result3 !== null && Math.abs(result3 - 24) < 0.001) {
+            return true;
+          }
+          
+          // 情况4: a op1 (b op2 (c op3 d))
+          let result4 = calculate(nums[2], nums[3], ops[2]);
+          if (result4 === null) continue;
+          result4 = calculate(nums[1], result4, ops[1]);
+          if (result4 === null) continue;
+          result4 = calculate(nums[0], result4, ops[0]);
+          if (result4 !== null && Math.abs(result4 - 24) < 0.001) {
+            return true;
+          }
+          
+          // 情况5: (a op1 b) op2 (c op3 d)
+          let result5a = calculate(nums[0], nums[1], ops[0]);
+          let result5b = calculate(nums[2], nums[3], ops[2]);
+          if (result5a === null || result5b === null) continue;
+          let result5 = calculate(result5a, result5b, ops[1]);
+          if (result5 !== null && Math.abs(result5 - 24) < 0.001) {
+            return true;
+          }
+        }
+      }
+      
+      return false;
+    }
+
+    // 计算两个数的运算结果
+    function calculate(a, b, operator) {
+      switch (operator) {
+        case '+':
+          return a + b;
+        case '-':
+          return a - b;
+        case '×':
+          return a * b;
+        case '÷':
+          // 避免除以零
+          if (b === 0) return null;
+          return a / b;
+        default:
+          return null;
+      }
+    }
+
+    // 生成数组的所有排列
+    function permute(arr) {
+      const result = [];
+      
+      // 递归生成排列
+      function backtrack(current, remaining) {
+        if (remaining.length === 0) {
+          result.push([...current]);
+          return;
+        }
+        
+        for (let i = 0; i < remaining.length; i++) {
+          const next = remaining[i];
+          current.push(next);
+          backtrack(current, [...remaining.slice(0, i), ...remaining.slice(i + 1)]);
+          current.pop();
+        }
+      }
+      
+      backtrack([], arr);
+      return result;
+    }
+
+    // 更新数字卡片显示
+    function updateNumberCards() {
+      for (let i = 0; i < 4; i++) {
+        const card = elements.numberCards[i];
+        const numberSpan = card.querySelector('.number');
+        numberSpan.textContent = gameState.numbers[i];
+        
+        // 重置卡片状态
+        card.classList.remove('opacity-50', 'pointer-events-none');
+        card.classList.add('cursor-pointer');
+      }
+    }
+
+    // 更新表达式显示
+    function updateExpressionDisplay() {
+      if (gameState.expression.length === 0) {
+        elements.expression.textContent = '请选择数字和运算符';
+        return;
+      }
+      
+      elements.expression.textContent = gameState.expression.join('');
+    }
+
+    // 开始计时器
+    function startTimer() {
+      gameState.timer = setInterval(() => {
+        gameState.seconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    // 停止计时器
+    function stopTimer() {
+      if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+      }
+    }
+
+    // 更新计时器显示
+    function updateTimerDisplay() {
+      const minutes = Math.floor(gameState.seconds / 60);
+      const seconds = gameState.seconds % 60;
+      elements.timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // 添加数字到表达式 - 修复了左括号后不能输入数字的问题
+    function addNumberToExpression(index) {
+      // 如果已经使用过这个数字，或者表达式已经有4个数字，则返回
+      if (gameState.usedNumbers.includes(index) || 
+          gameState.usedNumbers.length >= 4) {
+        return;
+      }
+      
+      // 检查表达式最后一个元素是否为右括号或数字
+      const lastElement = gameState.expression[gameState.expression.length - 1];
+      // 允许在左括号后添加数字，修复了之前的判断逻辑
+      if (lastElement === ')' || (!isOperator(lastElement) && lastElement !== undefined && lastElement !== '(')) {
+        return;
+      }
+      
+      // 添加数字到表达式
+      gameState.expression.push(gameState.numbers[index]);
+      gameState.usedNumbers.push(index);
+      
+      // 更新UI
+      updateExpressionDisplay();
+      
+      // 标记卡片为已使用
+      const card = elements.numberCards[index];
+      card.classList.add('opacity-50', 'pointer-events-none');
+      card.classList.remove('cursor-pointer');
+    }
+
+    // 添加运算符到表达式
+    function addOperatorToExpression(operator) {
+      // 处理括号
+      if (operator === '(') {
+        // 左括号可以在表达式开头，或在另一个左括号之后，或在运算符之后
+        const lastElement = gameState.expression[gameState.expression.length - 1];
+        if (gameState.expression.length === 0 || isOperator(lastElement) || lastElement === '(') {
+          gameState.expression.push(operator);
+          gameState.parenthesesCount++;
+          updateExpressionDisplay();
+        }
+        return;
+      }
+      
+      if (operator === ')') {
+        // 右括号需要有匹配的左括号，且不能在表达式开头，且前一个元素不能是运算符或左括号
+        if (gameState.parenthesesCount > 0 && 
+            gameState.expression.length > 0 && 
+            !isOperator(gameState.expression[gameState.expression.length - 1]) &&
+            gameState.expression[gameState.expression.length - 1] !== '(') {
+          gameState.expression.push(operator);
+          gameState.parenthesesCount--;
+          updateExpressionDisplay();
+        }
+        return;
+      }
+      
+      // 处理普通运算符
+      // 如果表达式为空，或者最后一个元素是运算符或左括号，则返回
+      if (gameState.expression.length === 0 || 
+          isOperator(gameState.expression[gameState.expression.length - 1]) ||
+          gameState.expression[gameState.expression.length - 1] === '(') {
+        return;
+      }
+      
+      // 添加运算符到表达式
+      gameState.expression.push(operator);
+      
+      // 更新UI
+      updateExpressionDisplay();
+    }
+
+    // 检查字符是否为运算符
+    function isOperator(char) {
+      return ['+', '-', '×', '÷'].includes(char);
+    }
+
+    // 清除表达式 - 新增隐藏消息区域的逻辑
+    function clearExpression() {
+      gameState.expression = [];
+      gameState.usedNumbers = [];
+      gameState.parenthesesCount = 0;
+      updateExpressionDisplay();
+      
+      // 隐藏验证结果消息
+      elements.message.classList.add('hidden');
+      
+      // 重置所有卡片状态
+      for (let card of elements.numberCards) {
+        card.classList.remove('opacity-50', 'pointer-events-none');
+        card.classList.add('cursor-pointer');
+      }
+    }
+
+    // 验证表达式结果
+    function validateExpression() {
+      // 检查是否使用了所有4个数字
+      if (gameState.usedNumbers.length !== 4) {
+        showMessage('请使用所有4个数字', 'error');
+        return;
+      }
+      
+      // 检查括号是否匹配
+      if (gameState.parenthesesCount !== 0) {
+        showMessage('括号不匹配', 'error');
+        return;
+      }
+      
+      // 检查表达式是否以运算符或左括号结尾
+      const lastElement = gameState.expression[gameState.expression.length - 1];
+      if (isOperator(lastElement) || lastElement === '(') {
+        showMessage('表达式格式不正确', 'error');
+        return;
+      }
+      
+      // 停止计时器
+      stopTimer();
+      
+      // 计算表达式结果
+      const result = evaluateExpression(gameState.expression);
+      
+      // 检查结果是否等于24
+      if (result !== null && Math.abs(result - 24) < 0.001) {
+        // 显示成功消息
+        showMessage('恭喜！答对了！', 'success');
+      } else {
+        // 显示失败消息和正确答案
+        const solution = findSolution(gameState.numbers);
+        showMessage('答错了，再试一次！', 'error', solution);
+      }
+      
+      // 标记游戏结束
+      gameState.gameStarted = false;
+    }
+
+    // 计算表达式结果
+    function evaluateExpression(expression) {
+      // 将表达式转换为可计算的格式
+      const expr = expression.join('').replace(/×/g, '*').replace(/÷/g, '/');
+      
+      try {
+        // 使用eval计算结果
+        return eval(expr);
+      } catch (error) {
+        console.error('表达式计算错误:', error);
+        return null;
+      }
+    }
+
+    // 查找一个解决方案
+    function findSolution(numbers) {
+      // 生成所有可能的运算符组合
+      const operators = ['+', '-', '*', '/'];
+      const operatorCombinations = [];
+      
+      // 生成所有3个运算符的组合（4个数字需要3个运算符）
+      for (let o1 of operators) {
+        for (let o2 of operators) {
+          for (let o3 of operators) {
+            operatorCombinations.push([o1, o2, o3]);
+          }
+        }
+      }
+      
+      // 生成所有可能的数字排列
+      const numberPermutations = permute(numbers);
+      
+      // 检查所有可能的组合
+      for (let nums of numberPermutations) {
+        for (let ops of operatorCombinations) {
+          // 情况1: ((a op1 b) op2 c) op3 d
+          let result1 = calculate(nums[0], nums[1], ops[0]);
+          if (result1 !== null) {
+            result1 = calculate(result1, nums[2], ops[1]);
+            if (result1 !== null) {
+              result1 = calculate(result1, nums[3], ops[2]);
+              if (result1 !== null && Math.abs(result1 - 24) < 0.001) {
+                return `((${nums[0]} ${ops[0]} ${nums[1]}) ${ops[1]} ${nums[2]}) ${ops[2]} ${nums[3]}`;
+              }
+            }
+          }
+          
+          // 情况2: (a op1 (b op2 c)) op3 d
+          let result2 = calculate(nums[1], nums[2], ops[1]);
+          if (result2 !== null) {
+            let temp = calculate(nums[0], result2, ops[0]);
+            if (temp !== null) {
+              temp = calculate(temp, nums[3], ops[2]);
+              if (temp !== null && Math.abs(temp - 24) < 0.001) {
+                return `(${nums[0]} ${ops[0]} (${nums[1]} ${ops[1]} ${nums[2]})) ${ops[2]} ${nums[3]}`;
+              }
+            }
+          }
+          
+          // 情况3: a op1 ((b op2 c) op3 d)
+          let result3 = calculate(nums[1], nums[2], ops[1]);
+          if (result3 !== null) {
+            result3 = calculate(result3, nums[3], ops[2]);
+            if (result3 !== null) {
+              let temp = calculate(nums[0], result3, ops[0]);
+              if (temp !== null && Math.abs(temp - 24) < 0.001) {
+                return `${nums[0]} ${ops[0]} ((${nums[1]} ${ops[1]} ${nums[2]}) ${ops[2]} ${nums[3]})`;
+              }
+            }
+          }
+          
+          // 情况4: a op1 (b op2 (c op3 d))
+          let result4 = calculate(nums[2], nums[3], ops[2]);
+          if (result4 !== null) {
+            result4 = calculate(nums[1], result4, ops[1]);
+            if (result4 !== null) {
+              let temp = calculate(nums[0], result4, ops[0]);
+              if (temp !== null && Math.abs(temp - 24) < 0.001) {
+                return `${nums[0]} ${ops[0]} (${nums[1]} ${ops[1]} (${nums[2]} ${ops[2]} ${nums[3]}))`;
+              }
+            }
+          }
+          
+          // 情况5: (a op1 b) op2 (c op3 d)
+          let result5a = calculate(nums[0], nums[1], ops[0]);
+          let result5b = calculate(nums[2], nums[3], ops[2]);
+          if (result5a !== null && result5b !== null) {
+            let result5 = calculate(result5a, result5b, ops[1]);
+            if (result5 !== null && Math.abs(result5 - 24) < 0.001) {
+              return `(${nums[0]} ${ops[0]} ${nums[1]}) ${ops[1]} (${nums[2]} ${ops[2]} ${nums[3]})`;
+            }
+          }
+        }
+      }
+      
+      return '未找到解决方案';
+    }
+
+    // 显示消息
+    function showMessage(content, type, solution = null) {
+      elements.messageContent.textContent = content;
+      elements.message.className = 'w-full rounded-xl p-6 mb-8 text-center';
+      
+      if (type === 'success') {
+        elements.message.classList.add('bg-green-100', 'text-green-800');
+        elements.message.classList.remove('bg-red-100', 'text-red-800');
+        elements.solution.classList.add('hidden');
+      } else {
+        elements.message.classList.add('bg-red-100', 'text-red-800');
+        elements.message.classList.remove('bg-green-100', 'text-green-800');
+        
+        if (solution) {
+          elements.solution.textContent = `正确答案参考: ${solution}`;
+          elements.solution.classList.remove('hidden');
+        } else {
+          elements.solution.classList.add('hidden');
+        }
+      }
+      
+      elements.message.classList.remove('hidden');
+    }
+
+    // 添加事件监听器
+    function addEventListeners() {
+      // 数字卡片点击事件
+      for (let i = 0; i < elements.numberCards.length; i++) {
+        elements.numberCards[i].addEventListener('click', () => {
+          addNumberToExpression(i);
+        });
+      }
+      
+      // 运算符按钮点击事件
+      for (let btn of elements.operatorBtns) {
+        btn.addEventListener('click', () => {
+          const operator = btn.getAttribute('data-operator');
+          addOperatorToExpression(operator);
+        });
+      }
+      
+      // 清除按钮点击事件
+      elements.clearBtn.addEventListener('click', clearExpression);
+      
+      // 提交按钮点击事件
+      elements.submitBtn.addEventListener('click', validateExpression);
+      
+      // 新游戏按钮点击事件
+      elements.newGameBtn.addEventListener('click', newGame);
+      
+      // 键盘事件
+      document.addEventListener('keydown', (e) => {
+        // 数字键 1-4 对应卡片 0-3
+        if (e.key >= '1' && e.key <= '4') {
+          const index = parseInt(e.key) - 1;
+          addNumberToExpression(index);
+        }
+        
+        // 运算符键
+        if (['+', '-', '*', '/', '(', ')'].includes(e.key)) {
+          let operator = e.key;
+          if (operator === '*') operator = '×';
+          if (operator === '/') operator = '÷';
+          addOperatorToExpression(operator);
+        }
+        
+        // 回车键提交
+        if (e.key === 'Enter') {
+          validateExpression();
+        }
+        
+        // ESC键清除
+        if (e.key === 'Escape') {
+          clearExpression();
+        }
+      });
+    }
+
+    // 初始化游戏
+    window.addEventListener('DOMContentLoaded', initGame);
+  </script>
+</body>
+</html>
