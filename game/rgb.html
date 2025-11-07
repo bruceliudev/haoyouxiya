@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>色彩小画家 - RGB颜色游戏</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6C63FF',
+                        red: '#FF6B6B',
+                        green: '#4ECDC4',
+                        blue: '#45B7D1',
+                        yellow: '#FFD166',
+                        purple: '#9D4EDD',
+                        cyan: '#2EC4B6',
+                        white: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        comic: ['Comic Sans MS', 'cursive', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .slider-thumb {
+                @apply appearance-none w-6 h-6 rounded-full cursor-pointer border-2 border-white shadow-md;
+            }
+            .game-card {
+                @apply bg-white rounded-xl shadow-lg p-5 transition-all duration-300 hover:shadow-xl;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded-full transition-all duration-300 transform hover:scale-105;
+            }
+            .color-box {
+                @apply w-full rounded-xl transition-all duration-500 shadow-inner;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-blue-50 min-h-screen font-comic text-gray-800">
+    <!-- 游戏头部 -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-md py-4">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-red to-green to-blue flex items-center justify-center">
+                        <i class="fa fa-paint-brush text-white text-xl"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-primary">色彩小画家</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="soundBtn" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="fa fa-volume-up text-xl"></i>
+                    </button>
+                    <button id="helpBtn" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="fa fa-question-circle text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 游戏主内容 -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- 游戏介绍 -->
+        <div class="text-center mb-8 max-w-2xl mx-auto">
+            <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-3">RGB颜色混合游戏</h2>
+            <p class="text-gray-600 text-lg">拖动滑块，混合红、绿、蓝三种颜色，创造出各种奇妙的色彩吧！</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧：颜色混合区 -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- 颜色展示区 -->
+                <div class="game-card">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-square text-primary mr-2"></i> 混合颜色
+                    </h3>
+                    <div class="color-box h-64 md:h-80 mb-4" id="colorResult" style="background-color: rgb(0, 0, 0);"></div>
+                    <div class="text-center">
+                        <p class="text-lg font-bold" id="colorName">黑色</p>
+                        <p class="text-gray-500" id="colorValue">RGB(0, 0, 0)</p>
+                    </div>
+                </div>
+
+                <!-- 颜色滑块控制区 -->
+                <div class="game-card">
+                    <h3 class="text-xl font-bold mb-6 flex items-center">
+                        <i class="fa fa-sliders text-primary mr-2"></i> 调整颜色
+                    </h3>
+                    
+                    <!-- 红色滑块 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="redSlider" class="font-bold text-red flex items-center">
+                                <i class="fa fa-circle mr-2"></i> 红色
+                            </label>
+                            <span id="redValue" class="bg-red/10 text-red px-3 py-1 rounded-full text-sm font-bold">0</span>
+                        </div>
+                        <input 
+                            type="range" 
+                            id="redSlider" 
+                            min="0" 
+                            max="255" 
+                            value="0"
+                            class="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                            style="accent-color: #FF6B6B;"
+                        >
+                    </div>
+                    
+                    <!-- 绿色滑块 -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="greenSlider" class="font-bold text-green flex items-center">
+                                <i class="fa fa-circle mr-2"></i> 绿色
+                            </label>
+                            <span id="greenValue" class="bg-green/10 text-green px-3 py-1 rounded-full text-sm font-bold">0</span>
+                        </div>
+                        <input 
+                            type="range" 
+                            id="greenSlider" 
+                            min="0" 
+                            max="255" 
+                            value="0"
+                            class="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                            style="accent-color: #4ECDC4;"
+                        >
+                    </div>
+                    
+                    <!-- 蓝色滑块 -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="blueSlider" class="font-bold text-blue flex items-center">
+                                <i class="fa fa-circle mr-2"></i> 蓝色
+                            </label>
+                            <span id="blueValue" class="bg-blue/10 text-blue px-3 py-1 rounded-full text-sm font-bold">0</span>
+                        </div>
+                        <input 
+                            type="range" 
+                            id="blueSlider" 
+                            min="0" 
+                            max="255" 
+                            value="0"
+                            class="w-full h-3 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                            style="accent-color: #45B7D1;"
+                        >
+                    </div>
+                    
+                    <div class="mt-6 flex justify-center space-x-4">
+                        <button id="resetBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded-full transition-all duration-300">
+                            <i class="fa fa-refresh mr-2"></i> 重置
+                        </button>
+                        <button id="randomBtn" class="bg-yellow hover:bg-yellow/90 text-gray-800 font-bold py-2 px-6 rounded-full transition-all duration-300">
+                            <i class="fa fa-random mr-2"></i> 随机颜色
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：游戏挑战区 -->
+            <div class="space-y-6">
+                <!-- 颜色挑战 -->
+                <div class="game-card">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-trophy text-yellow mr-2"></i> 颜色挑战
+                    </h3>
+                    <p class="text-gray-600 mb-4">尝试混合出目标颜色，完成挑战！</p>
+                    
+                    <div class="text-center mb-4">
+                        <p class="font-bold mb-2">目标颜色</p>
+                        <div class="color-box h-32 mx-auto mb-2" id="targetColor" style="background-color: rgb(255, 255, 0);"></div>
+                        <p class="font-bold" id="targetColorName">黄色</p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-sm text-gray-500">挑战进度</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                                <div class="bg-primary h-2.5 rounded-full" id="progressBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <span id="progressText" class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">0%</span>
+                    </div>
+                    
+                    <button id="checkBtn" class="w-full btn-primary">
+                        <i class="fa fa-check mr-2"></i> 检查答案
+                    </button>
+                </div>
+                
+                <!-- 颜色知识 -->
+                <div class="game-card">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-book text-purple mr-2"></i> 颜色小知识
+                    </h3>
+                    <div class="space-y-3 text-gray-600" id="colorFact">
+                        <p>红、绿、蓝是光的三原色，它们可以混合出所有颜色！</p>
+                        <p>红色 + 绿色 = 黄色</p>
+                        <p>绿色 + 蓝色 = 青色</p>
+                        <p>红色 + 蓝色 = 紫色</p>
+                        <p>红 + 绿 + 蓝 = 白色</p>
+                    </div>
+                </div>
+                
+                <!-- 已解锁颜色 -->
+                <div class="game-card">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-star text-yellow mr-2"></i> 已解锁颜色
+                    </h3>
+                    <div class="flex flex-wrap gap-2" id="unlockedColors">
+                        <div class="w-8 h-8 rounded-full bg-black border-2 border-white shadow-sm" title="黑色"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 颜色示例区 -->
+        <div class="mt-8">
+            <div class="game-card">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-th text-primary mr-2"></i> 常见颜色示例
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    <div class="text-center">
+                        <div class="w-full h-24 rounded-lg mb-2" style="background-color: rgb(255, 0, 0);"></div>
+                        <p class="font-bold">红色</p>
+                        <p class="text-xs text-gray-500">R=255</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-full h-24 rounded-lg mb-2" style="background-color: rgb(0, 255, 0);"></div>
+                        <p class="font-bold">绿色</p>
+                        <p class="text-xs text-gray-500">G=255</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-full h-24 rounded-lg mb-2" style="background-color: rgb(0, 0, 255);"></div>
+                        <p class="font-bold">蓝色</p>
+                        <p class="text-xs text-gray-500">B=255</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-full h-24 rounded-lg mb-2" style="background-color: rgb(255, 255, 0);"></div>
+                        <p class="font-bold">黄色</p>
+                        <p class="text-xs text-gray-500">R+G</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-full h-24 rounded-lg mb-2" style="background-color: rgb(0, 255, 255);"></div>
+                        <p class="font-bold">青色</p>
+                        <p class="text-xs text-gray-500">G+B</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-full h-24 rounded-lg mb-2" style="background-color: rgb(255, 0, 255);"></div>
+                        <p class="font-bold">紫色</p>
+                        <p class="text-xs text-gray-500">R+B</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 帮助弹窗 -->
+    <div id="helpModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold text-primary">游戏帮助</h3>
+                <button id="closeHelpBtn" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-gray-600">
+                <p><i class="fa fa-hand-o-right text-primary mr-2"></i> 拖动红、绿、蓝滑块来混合颜色</p>
+                <p><i class="fa fa-hand-o-right text-primary mr-2"></i> 尝试匹配右侧的目标颜色</p>
+                <p><i class="fa fa-hand-o-right text-primary mr-2"></i> 完成挑战可以解锁新颜色</p>
+                <p><i class="fa fa-hand-o-right text-primary mr-2"></i> 点击"检查答案"按钮查看匹配度</p>
+                <p><i class="fa fa-hand-o-right text-primary mr-2"></i> 可以点击"随机颜色"按钮获得灵感</p>
+            </div>
+            <button id="gotItBtn" class="mt-6 w-full btn-primary">我知道了</button>
+        </div>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 text-center">
+            <div class="text-yellow text-5xl mb-4">
+                <i class="fa fa-trophy"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-2">太棒了！</h3>
+            <p class="text-gray-600 mb-6">你成功混合出了目标颜色！</p>
+            <div class="mb-6">
+                <p class="font-bold mb-1">你解锁了新颜色：</p>
+                <div id="unlockedColorPreview" class="w-16 h-16 rounded-full mx-auto border-4 border-white shadow-md"></div>
+                <p id="unlockedColorName" class="mt-2 font-bold"></p>
+            </div>
+            <button id="nextChallengeBtn" class="w-full btn-primary">下一个挑战</button>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-white/80 backdrop-blur-sm py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-500">
+            <p>色彩小画家 &copy; 2023 - 一款帮助小朋友学习颜色混合的游戏</p>
+            <p class="text-sm mt-2">建议家长陪同孩子一起玩，探索色彩的奥秘！</p>
+        </div>
+    </footer>
+
+    <script>
+        // 获取DOM元素
+        const redSlider = document.getElementById('redSlider');
+        const greenSlider = document.getElementById('greenSlider');
+        const blueSlider = document.getElementById('blueSlider');
+        const redValue = document.getElementById('redValue');
+        const greenValue = document.getElementById('greenValue');
+        const blueValue = document.getElementById('blueValue');
+        const colorResult = document.getElementById('colorResult');
+        const colorName = document.getElementById('colorName');
+        const colorValue = document.getElementById('colorValue');
+        const resetBtn = document.getElementById('resetBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const targetColor = document.getElementById('targetColor');
+        const targetColorName = document.getElementById('targetColorName');
+        const checkBtn = document.getElementById('checkBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const helpBtn = document.getElementById('helpBtn');
+        const helpModal = document.getElementById('helpModal');
+        const closeHelpBtn = document.getElementById('closeHelpBtn');
+        const gotItBtn = document.getElementById('gotItBtn');
+        const successModal = document.getElementById('successModal');
+        const nextChallengeBtn = document.getElementById('nextChallengeBtn');
+        const unlockedColors = document.getElementById('unlockedColors');
+        const unlockedColorPreview = document.getElementById('unlockedColorPreview');
+        const unlockedColorName = document.getElementById('unlockedColorName');
+        const soundBtn = document.getElementById('soundBtn');
+
+        // 颜色名称映射表
+        const colorNames = {
+            'rgb(0, 0, 0)': '黑色',
+            'rgb(255, 255, 255)': '白色',
+            'rgb(255, 0, 0)': '红色',
+            'rgb(0, 255, 0)': '绿色',
+            'rgb(0, 0, 255)': '蓝色',
+            'rgb(255, 255, 0)': '黄色',
+            'rgb(0, 255, 255)': '青色',
+            'rgb(255, 0, 255)': '紫色',
+            'rgb(128, 128, 128)': '灰色',
+            'rgb(255, 165, 0)': '橙色',
+            'rgb(128, 0, 128)': '深紫色',
+            'rgb(0, 128, 0)': '深绿色',
+            'rgb(255, 192, 203)': '粉色'
+        };
+
+        // 预设挑战颜色
+        const challengeColors = [
+            { rgb: 'rgb(255, 255, 0)', name: '黄色' },
+            { rgb: 'rgb(0, 255, 255)', name: '青色' },
+            { rgb: 'rgb(255, 0, 255)', name: '紫色' },
+            { rgb: 'rgb(255, 165, 0)', name: '橙色' },
+            { rgb: 'rgb(255, 192, 203)', name: '粉色' },
+            { rgb: 'rgb(128, 128, 128)', name: '灰色' },
+            { rgb: 'rgb(255, 255, 255)', name: '白色' },
+            { rgb: 'rgb(128, 0, 128)', name: '深紫色' }
+        ];
+
+        let currentChallengeIndex = 0;
+        let unlockedColorList = ['rgb(0, 0, 0)'];
+        let soundEnabled = true;
+
+        // 更新颜色显示
+        function updateColor() {
+            const r = parseInt(redSlider.value);
+            const g = parseInt(greenSlider.value);
+            const b = parseInt(blueSlider.value);
+            
+            // 更新数值显示
+            redValue.textContent = r;
+            greenValue.textContent = g;
+            blueValue.textContent = b;
+            
+            // 更新颜色显示
+            const rgbStr = `rgb(${r}, ${g}, ${b})`;
+            colorResult.style.backgroundColor = rgbStr;
+            colorValue.textContent = rgbStr;
+            
+            // 确定颜色名称
+            colorName.textContent = colorNames[rgbStr] || '混合色';
+            
+            // 检查是否解锁新颜色
+            checkUnlockedColor(rgbStr);
+        }
+
+        // 检查是否解锁新颜色
+        function checkUnlockedColor(rgbStr) {
+            if (colorNames[rgbStr] && !unlockedColorList.includes(rgbStr)) {
+                unlockedColorList.push(rgbStr);
+                addUnlockedColor(rgbStr);
+            }
+        }
+
+        // 添加已解锁颜色
+        function addUnlockedColor(rgbStr) {
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'w-8 h-8 rounded-full border-2 border-white shadow-sm';
+            colorDiv.style.backgroundColor = rgbStr;
+            colorDiv.title = colorNames[rgbStr] || '混合色';
+            unlockedColors.appendChild(colorDiv);
+        }
+
+        // 重置颜色
+        function resetColors() {
+            redSlider.value = 0;
+            greenSlider.value = 0;
+            blueSlider.value = 0;
+            updateColor();
+        }
+
+        // 随机颜色
+        function randomColor() {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            
+            redSlider.value = r;
+            greenSlider.value = g;
+            blueSlider.value = b;
+            updateColor();
+        }
+
+        // 设置挑战颜色
+        function setChallengeColor(index) {
+            const challenge = challengeColors[index];
+            targetColor.style.backgroundColor = challenge.rgb;
+            targetColorName.textContent = challenge.name;
+        }
+
+        // 检查颜色匹配度
+        function checkColorMatch() {
+            // 获取当前颜色和目标颜色的RGB值
+            const currentR = parseInt(redSlider.value);
+            const currentG = parseInt(greenSlider.value);
+            const currentB = parseInt(blueSlider.value);
+            
+            const targetRgb = challengeColors[currentChallengeIndex].rgb;
+            const [targetR, targetG, targetB] = targetRgb.match(/\d+/g).map(Number);
+            
+            // 计算每个通道的差异
+            const diffR = Math.abs(currentR - targetR);
+            const diffG = Math.abs(currentG - targetG);
+            const diffB = Math.abs(currentB - targetB);
+            
+            // 计算总体差异 (0-765)
+            const totalDiff = diffR + diffG + diffB;
+            
+            // 计算匹配度 (0-100%)
+            const matchPercentage = Math.max(0, 100 - (totalDiff / 765 * 100));
+            
+            // 更新进度条
+            progressBar.style.width = `${matchPercentage}%`;
+            progressText.textContent = `${Math.round(matchPercentage)}%`;
+            
+            // 如果匹配度足够高，显示成功弹窗
+            if (matchPercentage >= 95) {
+                showSuccessModal();
+            }
+            
+            return matchPercentage;
+        }
+
+        // 显示成功弹窗
+        function showSuccessModal() {
+            const currentColor = challengeColors[currentChallengeIndex];
+            unlockedColorPreview.style.backgroundColor = currentColor.rgb;
+            unlockedColorName.textContent = currentColor.name;
+            successModal.classList.remove('hidden');
+            
+            // 解锁这个颜色
+            checkUnlockedColor(currentColor.rgb);
+        }
+
+        // 下一个挑战
+        function nextChallenge() {
+            currentChallengeIndex = (currentChallengeIndex + 1) % challengeColors.length;
+            setChallengeColor(currentChallengeIndex);
+            successModal.classList.add('hidden');
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+        }
+
+        // 切换声音
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = soundBtn.querySelector('i');
+            if (soundEnabled) {
+                icon.classList.remove('fa-volume-off');
+                icon.classList.add('fa-volume-up');
+            } else {
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-off');
+            }
+        }
+
+        // 事件监听
+        redSlider.addEventListener('input', updateColor);
+        greenSlider.addEventListener('input', updateColor);
+        blueSlider.addEventListener('input', updateColor);
+        resetBtn.addEventListener('click', resetColors);
+        randomBtn.addEventListener('click', randomColor);
+        checkBtn.addEventListener('click', checkColorMatch);
+        helpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'));
+        closeHelpBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
+        gotItBtn.addEventListener('click', () => helpModal.classList.add('hidden'));
+        nextChallengeBtn.addEventListener('click', nextChallenge);
+        soundBtn.addEventListener('click', toggleSound);
+
+        // 初始化
+        updateColor();
+        setChallengeColor(currentChallengeIndex);
+    </script>
+</body>
+</html>
