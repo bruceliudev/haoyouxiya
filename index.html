@@ -1,678 +1,193 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>好游戏呀 - 儿童益智游戏集合</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <script>
-    // 配置Tailwind自定义颜色和字体
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#FF6B6B',    // 活泼的粉红色作为主色调
-            secondary: '#4ECDC4',  // 清新的青色作为辅助色
-            accent: '#FFD166',     // 明亮的黄色作为强调色
-            light: '#F7FFF7',      // 浅色背景
-            dark: '#292F36'        // 深色文字
-          },
-          fontFamily: {
-            comic: ['Comic Sans MS', 'cursive', 'sans-serif'],
-          },
-        },
-      }
-    }
-  </script>
-  <style type="text/tailwindcss">
-    @layer utilities {
-      .content-auto {
-        content-visibility: auto;
-      }
-      .game-card {
-        @apply bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer;
-      }
-      .btn-primary {
-        @apply bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 transform hover:scale-105;
-      }
-      .btn-secondary {
-        @apply bg-secondary hover:bg-secondary/90 text-white font-bold py-2 px-4 rounded-full transition-all duration-300 transform hover:scale-105;
-      }
-      .section-title {
-        @apply text-[clamp(1.5rem,3vw,2.5rem)] font-comic font-bold text-dark mb-6 relative inline-block;
-      }
-      .section-title::after {
-        @apply content-[''] absolute w-1/2 h-2 bg-accent bottom-0 left-0 rounded-full;
-      }
-    }
-  </style>
-</head>
-<body class="bg-light font-comic text-dark">
-  <!-- 顶部导航栏 -->
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-md">
-    <div class="container mx-auto px-4 py-3">
-      <div class="flex justify-between items-center">
-        <!-- Logo -->
-        <div class="flex items-center space-x-2">
-          <div class="text-primary text-3xl">
-            <i class="fa fa-gamepad"></i>
-          </div>
-          <h1 class="text-[clamp(1.2rem,3vw,1.8rem)] font-bold text-primary">好游戏呀</h1>
-        </div>
-        
-        <!-- 主导航 - 桌面版 -->
-        <nav class="hidden md:flex items-center space-x-6">
-          <a href="#" class="font-bold text-primary hover:text-primary/80 transition-colors">首页</a>
-          <a href="#categories" class="font-bold hover:text-primary transition-colors">游戏分类</a>
-          <a href="#popular" class="font-bold hover:text-primary transition-colors">热门游戏</a>
-          <a href="#new" class="font-bold hover:text-primary transition-colors">最新上线</a>
-          <a href="#about" class="font-bold hover:text-primary transition-colors">关于我们</a>
-        </nav>
-        
-        <!-- 搜索框 -->
-        <div class="hidden md:flex items-center relative">
-          <input type="text" placeholder="搜索游戏..." class="pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 w-48 lg:w-64">
-          <i class="fa fa-search absolute left-3 text-gray-400"></i>
-        </div>
-        
-        <!-- 移动端菜单按钮 -->
-        <button class="md:hidden text-2xl text-primary" id="menuBtn">
-          <i class="fa fa-bars"></i>
-        </button>
-      </div>
-      
-      <!-- 移动端导航菜单 -->
-      <div class="md:hidden hidden mt-4 pb-2" id="mobileMenu">
-        <nav class="flex flex-col space-y-3">
-          <a href="#" class="font-bold text-primary py-2">首页</a>
-          <a href="#categories" class="font-bold py-2 hover:text-primary transition-colors">游戏分类</a>
-          <a href="#popular" class="font-bold py-2 hover:text-primary transition-colors">热门游戏</a>
-          <a href="#new" class="font-bold py-2 hover:text-primary transition-colors">最新上线</a>
-          <a href="#about" class="font-bold py-2 hover:text-primary transition-colors">关于我们</a>
-        </nav>
-        <div class="mt-3 relative">
-          <input type="text" placeholder="搜索游戏..." class="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50">
-          <i class="fa fa-search absolute left-3 top-3 text-gray-400"></i>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- 英雄区域 -->
-  <section class="bg-gradient-to-r from-primary/10 to-secondary/10 py-12 md:py-20">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row items-center">
-        <div class="md:w-1/2 mb-8 md:mb-0">
-          <h2 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight mb-4">
-            儿童益智游戏<br>
-            <span class="text-primary">快乐成长</span>的好伙伴
-          </h2>
-          <p class="text-lg md:text-xl mb-8 max-w-lg">
-            超过100款适合4-12岁儿童的益智游戏，让孩子在玩乐中学习，在游戏中成长。
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4">
-            <a href="game/calculator24.html" class="btn-primary text-center">
-            <i class="fa fa-play-circle mr-2"></i>开始玩游戏
-          </a>
-            <a href="#categories" class="btn-secondary text-center">
-              <i class="fa fa-th-large mr-2"></i>浏览分类
-            </a>
-          </div>
-        </div>
-        <div class="md:w-1/2 relative">
-          <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
-            <img src="https://picsum.photos/id/237/600/400" alt="孩子们玩游戏的快乐场景" class="w-full h-auto">
-          </div>
-          <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-accent rounded-full opacity-50 z-0"></div>
-          <div class="absolute -top-6 -right-6 w-24 h-24 bg-primary rounded-full opacity-50 z-0"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 游戏分类 -->
-  <section id="categories" class="py-16 bg-white">
-    <div class="container mx-auto px-4">
-      <h2 class="section-title">游戏分类</h2>
-      
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-6">
-        <!-- 分类1：数学游戏 -->
-        <div class="bg-primary/10 rounded-xl p-4 text-center transition-all duration-300 hover:bg-primary/20 cursor-pointer transform hover:scale-105">
-          <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="fa fa-calculator text-2xl text-primary"></i>
-          </div>
-          <h3 class="font-bold">数学游戏</h3>
-        </div>
-        
-        <!-- 分类2：识字游戏 -->
-        <div class="bg-secondary/10 rounded-xl p-4 text-center transition-all duration-300 hover:bg-secondary/20 cursor-pointer transform hover:scale-105">
-          <div class="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="fa fa-book text-2xl text-secondary"></i>
-          </div>
-          <h3 class="font-bold">识字游戏</h3>
-        </div>
-        
-        <!-- 分类3：拼图游戏 -->
-        <div class="bg-accent/10 rounded-xl p-4 text-center transition-all duration-300 hover:bg-accent/20 cursor-pointer transform hover:scale-105">
-          <div class="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="fa fa-puzzle-piece text-2xl text-accent"></i>
-          </div>
-          <h3 class="font-bold">拼图游戏</h3>
-        </div>
-        
-        <!-- 分类4：记忆游戏 -->
-        <div class="bg-green-100 rounded-xl p-4 text-center transition-all duration-300 hover:bg-green-200 cursor-pointer transform hover:scale-105">
-          <div class="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="fa fa-brain text-2xl text-green-600"></i>
-          </div>
-          <h3 class="font-bold">记忆游戏</h3>
-        </div>
-        
-        <!-- 分类5：逻辑游戏 -->
-        <div class="bg-purple-100 rounded-xl p-4 text-center transition-all duration-300 hover:bg-purple-200 cursor-pointer transform hover:scale-105">
-          <div class="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="fa fa-sitemap text-2xl text-purple-600"></i>
-          </div>
-          <h3 class="font-bold">逻辑游戏</h3>
-        </div>
-        
-        <!-- 分类6：绘画游戏 -->
-        <div class="bg-blue-100 rounded-xl p-4 text-center transition-all duration-300 hover:bg-blue-200 cursor-pointer transform hover:scale-105">
-          <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center mx-auto mb-3">
-            <i class="fa fa-paint-brush text-2xl text-blue-600"></i>
-          </div>
-          <h3 class="font-bold">绘画游戏</h3>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 热门游戏 -->
-  <section id="popular" class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="section-title">热门游戏</h2>
-        <a href="#" class="text-primary font-bold hover:underline flex items-center">
-          查看全部 <i class="fa fa-arrow-right ml-2"></i>
-        </a>
-      </div>
-      
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-        <!-- 游戏1 -->
-        <div class="game-card">
-          <div class="relative">
-            <img src="https://picsum.photos/id/1/300/200" alt="数字拼图大挑战" class="w-full h-48 object-cover">
-            <div class="absolute top-2 right-2 bg-primary text-white text-xs font-bold px-2 py-1 rounded-full">
-              数学
-            </div>
-            <div class="absolute top-2 left-2 bg-accent text-dark text-xs font-bold px-2 py-1 rounded-full flex items-center">
-              <i class="fa fa-star mr-1"></i> 4.9
-            </div>
-          </div>
-          <div class="p-3">
-            <h3 class="font-bold text-lg mb-1">数字拼图大挑战</h3>
-            <p class="text-sm text-gray-600 mb-3">适合6-10岁</p>
-            <button class="w-full bg-primary/10 hover:bg-primary/20 text-primary font-bold py-1 rounded-lg transition-colors">
-              开始游戏
-            </button>
-          </div>
-        </div>
-        
-        <!-- 游戏2 -->
-        <div class="game-card">
-          <div class="relative">
-            <img src="https://picsum.photos/id/20/300/200" alt="汉字连连看" class="w-full h-48 object-cover">
-            <div class="absolute top-2 right-2 bg-secondary text-white text-xs font-bold px-2 py-1 rounded-full">
-              识字
-            </div>
-            <div class="absolute top-2 left-2 bg-accent text-dark text-xs font-bold px-2 py-1 rounded-full flex items-center">
-              <i class="fa fa-star mr-1"></i> 4.8
-            </div>
-          </div>
-          <div class="p-3">
-            <h3 class="font-bold text-lg mb-1">汉字连连看</h3>
-            <p class="text-sm text-gray-600 mb-3">适合5-8岁</p>
-            <button class="w-full bg-primary/10 hover:bg-primary/20 text-primary font-bold py-1 rounded-lg transition-colors">
-              开始游戏
-            </button>
-          </div>
-        </div>
-        
-        <!-- 游戏3 -->
-        <div class="game-card">
-          <div class="relative">
-            <img src="https://picsum.photos/id/96/300/200" alt="动物拼图大师" class="w-full h-48 object-cover">
-            <div class="absolute top-2 right-2 bg-accent text-dark text-xs font-bold px-2 py-1 rounded-full">
-              拼图
-            </div>
-            <div class="absolute top-2 left-2 bg-accent text-dark text-xs font-bold px-2 py-1 rounded-full flex items-center">
-              <i class="fa fa-star mr-1"></i> 4.7
-            </div>
-          </div>
-          <div class="p-3">
-            <h3 class="font-bold text-lg mb-1">动物拼图大师</h3>
-            <p class="text-sm text-gray-600 mb-3">适合4-7岁</p>
-            <button class="w-full bg-primary/10 hover:bg-primary/20 text-primary font-bold py-1 rounded-lg transition-colors">
-              开始游戏
-            </button>
-          </div>
-        </div>
-        
-        <!-- 游戏4 -->
-        <div class="game-card">
-          <div class="relative">
-            <img src="https://picsum.photos/id/26/300/200" alt="记忆卡片配对" class="w-full h-48 object-cover">
-            <div class="absolute top-2 right-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-              记忆
-            </div>
-            <div class="absolute top-2 left-2 bg-accent text-dark text-xs font-bold px-2 py-1 rounded-full flex items-center">
-              <i class="fa fa-star mr-1"></i> 4.6
-            </div>
-          </div>
-          <div class="p-3">
-            <h3 class="font-bold text-lg mb-1">记忆卡片配对</h3>
-            <p class="text-sm text-gray-600 mb-3">适合4-6岁</p>
-            <button class="w-full bg-primary/10 hover:bg-primary/20 text-primary font-bold py-1 rounded-lg transition-colors">
-              开始游戏
-            </button>
-          </div>
-        </div>
-        
-        <!-- 游戏5 -->
-        <div class="game-card">
-          <div class="relative">
-            <img src="https://picsum.photos/id/60/300/200" alt="逻辑迷宫冒险" class="w-full h-48 object-cover">
-            <div class="absolute top-2 right-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-              逻辑
-            </div>
-            <div class="absolute top-2 left-2 bg-accent text-dark text-xs font-bold px-2 py-1 rounded-full flex items-center">
-              <i class="fa fa-star mr-1"></i> 4.5
-            </div>
-          </div>
-          <div class="p-3">
-            <h3 class="font-bold text-lg mb-1">逻辑迷宫冒险</h3>
-            <p class="text-sm text-gray-600 mb-3">适合8-12岁</p>
-            <button class="w-full bg-primary/10 hover:bg-primary/20 text-primary font-bold py-1 rounded-lg transition-colors">
-              开始游戏
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 最新上线 -->
-  <section id="new" class="py-16 bg-white">
-    <div class="container mx-auto px-4">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="section-title">最新上线</h2>
-        <a href="#" class="text-primary font-bold hover:underline flex items-center">
-          查看全部 <i class="fa fa-arrow-right ml-2"></i>
-        </a>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- 新游戏1 -->
-        <div class="game-card flex flex-col md:flex-row">
-          <div class="md:w-2/5 relative">
-            <img src="https://picsum.photos/id/119/300/300" alt="彩虹绘画板" class="w-full h-full object-cover">
-            <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-              新游戏
-            </div>
-          </div>
-          <div class="md:w-3/5 p-4 flex flex-col">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="font-bold text-xl">彩虹绘画板</h3>
-              <span class="bg-blue-100 text-blue-600 text-xs font-bold px-2 py-1 rounded-full">绘画</span>
-            </div>
-            <p class="text-gray-600 mb-4 flex-grow">
-              一款适合儿童的绘画工具，有丰富的色彩和形状，让孩子发挥想象力创作美丽的图画。
-            </p>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-500">适合4-10岁</span>
-              <button class="bg-primary text-white font-bold py-1 px-4 rounded-lg hover:bg-primary/90 transition-colors">
-                开始玩
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 新游戏2 -->
-        <div class="game-card flex flex-col md:flex-row">
-          <div class="md:w-2/5 relative">
-            <img src="https://picsum.photos/id/180/300/300" alt="数学小侦探" class="w-full h-full object-cover">
-            <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-              新游戏
-            </div>
-          </div>
-          <div class="md:w-3/5 p-4 flex flex-col">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="font-bold text-xl">数学小侦探</h3>
-              <span class="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-full">数学</span>
-            </div>
-            <p class="text-gray-600 mb-4 flex-grow">
-              解决有趣的数学谜题，帮助小侦探找到线索，提升孩子的数学计算能力和问题解决能力。
-            </p>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-500">适合7-12岁</span>
-              <button class="bg-primary text-white font-bold py-1 px-4 rounded-lg hover:bg-primary/90 transition-colors">
-                开始玩
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 新游戏3 -->
-        <div class="game-card flex flex-col md:flex-row">
-          <div class="md:w-2/5 relative">
-            <img src="https://picsum.photos/id/201/300/300" alt="成语猜猜看" class="w-full h-full object-cover">
-            <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-              新游戏
-            </div>
-          </div>
-          <div class="md:w-3/5 p-4 flex flex-col">
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="font-bold text-xl">成语猜猜看</h3>
-              <span class="bg-secondary/20 text-secondary text-xs font-bold px-2 py-1 rounded-full">识字</span>
-            </div>
-            <p class="text-gray-600 mb-4 flex-grow">
-              通过图片提示猜测成语，让孩子在游戏中学习更多成语知识，提高语言表达能力。
-            </p>
-            <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-500">适合9-12岁</span>
-              <button class="bg-primary text-white font-bold py-1 px-4 rounded-lg hover:bg-primary/90 transition-colors">
-                开始玩
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 年龄分组推荐 -->
-  <section class="py-16 bg-gradient-to-r from-primary/5 to-secondary/5">
-    <div class="container mx-auto px-4">
-      <h2 class="section-title">按年龄推荐</h2>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- 4-6岁 -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-          <div class="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mb-4">
-            <span class="font-bold text-2xl text-accent">4-6岁</span>
-          </div>
-          <h3 class="text-xl font-bold mb-3">幼儿启蒙游戏</h3>
-          <p class="text-gray-600 mb-4">
-            适合幼儿园阶段儿童，培养基本认知能力、动手能力和简单逻辑思维。
-          </p>
-          <ul class="space-y-2 mb-6">
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>简单操作，易于理解</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>色彩丰富，激发兴趣</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>亲子互动，共同学习</span>
-            </li>
-          </ul>
-          <a href="#" class="block text-center btn-secondary">查看推荐游戏</a>
-        </div>
-        
-        <!-- 7-9岁 -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-          <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mb-4">
-            <span class="font-bold text-2xl text-primary">7-9岁</span>
-          </div>
-          <h3 class="text-xl font-bold mb-3">小学低年级游戏</h3>
-          <p class="text-gray-600 mb-4">
-            适合小学1-3年级学生，巩固基础知识，提升学习兴趣和思维能力。
-          </p>
-          <ul class="space-y-2 mb-6">
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>结合课本知识</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>适度挑战，增强自信</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>培养独立思考能力</span>
-            </li>
-          </ul>
-          <a href="#" class="block text-center btn-primary">查看推荐游戏</a>
-        </div>
-        
-        <!-- 10-12岁 -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-          <div class="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center mb-4">
-            <span class="font-bold text-2xl text-secondary">10-12岁</span>
-          </div>
-          <h3 class="text-xl font-bold mb-3">小学高年级游戏</h3>
-          <p class="text-gray-600 mb-4">
-            适合小学4-6年级学生，挑战更复杂的问题，培养高级思维能力和创造力。
-          </p>
-          <ul class="space-y-2 mb-6">
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>复杂问题解决</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>培养逻辑推理能力</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa fa-check-circle text-green-500 mr-2"></i>
-              <span>鼓励创新思维</span>
-            </li>
-          </ul>
-          <a href="#" class="block text-center btn-secondary">查看推荐游戏</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 家长指南 -->
-  <section class="py-16 bg-white">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row items-center gap-8">
-        <div class="md:w-1/2">
-          <img src="https://picsum.photos/id/169/600/400" alt="家长指导孩子玩游戏" class="rounded-2xl shadow-lg w-full h-auto">
-        </div>
-        <div class="md:w-1/2">
-          <h2 class="section-title">家长指南</h2>
-          <p class="text-lg mb-6">
-            我们的游戏经过精心设计，不仅有趣味性，还能帮助孩子学习和成长。以下是一些建议，帮助您的孩子获得更好的游戏体验：
-          </p>
-          <div class="space-y-4">
-            <div class="flex items-start">
-              <div class="bg-primary/10 p-2 rounded-full mr-4 mt-1">
-                <i class="fa fa-clock-o text-primary"></i>
-              </div>
-              <div>
-                <h3 class="font-bold text-lg mb-1">控制游戏时间</h3>
-                <p class="text-gray-600">建议4-6岁儿童每次游戏不超过20分钟，7-12岁不超过30分钟。</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="bg-primary/10 p-2 rounded-full mr-4 mt-1">
-                <i class="fa fa-users text-primary"></i>
-              </div>
-              <div>
-                <h3 class="font-bold text-lg mb-1">亲子共同参与</h3>
-                <p class="text-gray-600">与孩子一起玩游戏，鼓励他们分享游戏中的发现和收获。</p>
-              </div>
-            </div>
-            <div class="flex items-start">
-              <div class="bg-primary/10 p-2 rounded-full mr-4 mt-1">
-                <i class="fa fa-graduation-cap text-primary"></i>
-              </div>
-              <div>
-                <h3 class="font-bold text-lg mb-1">联系实际生活</h3>
-                <p class="text-gray-600">将游戏中的知识与现实生活联系起来，增强学习效果。</p>
-              </div>
-            </div>
-          </div>
-          <a href="#" class="inline-block mt-8 btn-primary">
-            <i class="fa fa-file-text-o mr-2"></i>查看完整指南
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 关于我们 -->
-  <section id="about" class="py-16 bg-gray-50">
-    <div class="container mx-auto px-4 text-center">
-      <h2 class="section-title">关于好游戏呀</h2>
-      <div class="max-w-3xl mx-auto">
-        <p class="text-lg mb-6">
-          好游戏呀(haoyouxiya.com)是一个专为4-12岁儿童设计的益智游戏平台，我们精选了超过100款优质游戏，涵盖数学、识字、拼图、记忆、逻辑等多个领域。
-        </p>
-        <p class="text-lg mb-8">
-          我们的使命是让孩子在快乐游戏的同时学习知识、锻炼思维，为他们的成长提供有益的帮助。所有游戏都经过精心筛选，确保内容健康、寓教于乐。
-        </p>
-        <div class="flex justify-center space-x-6">
-          <a href="#" class="text-2xl text-primary hover:text-primary/80 transition-colors">
-            <i class="fa fa-weixin"></i>
-          </a>
-          <a href="#" class="text-2xl text-primary hover:text-primary/80 transition-colors">
-            <i class="fa fa-weibo"></i>
-          </a>
-          <a href="#" class="text-2xl text-primary hover:text-primary/80 transition-colors">
-            <i class="fa fa-envelope"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 页脚 -->
-  <footer class="bg-dark text-white py-12">
-    <div class="container mx-auto px-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div>
-          <div class="flex items-center space-x-2 mb-4">
-            <div class="text-primary text-3xl">
-              <i class="fa fa-gamepad"></i>
-            </div>
-            <h3 class="text-xl font-bold text-primary">好游戏呀</h3>
-          </div>
-          <p class="text-gray-400 mb-4">
-            儿童益智游戏集合，让孩子在快乐中学习成长。
-          </p>
-          <p class="text-gray-500 text-sm">
-            © 2023 好游戏呀 版权所有
-          </p>
-        </div>
-        
-        <div>
-          <h4 class="text-lg font-bold mb-4">快速链接</h4>
-          <ul class="space-y-2">
-            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">首页</a></li>
-            <li><a href="#categories" class="text-gray-400 hover:text-primary transition-colors">游戏分类</a></li>
-            <li><a href="#popular" class="text-gray-400 hover:text-primary transition-colors">热门游戏</a></li>
-            <li><a href="#new" class="text-gray-400 hover:text-primary transition-colors">最新上线</a></li>
-            <li><a href="#about" class="text-gray-400 hover:text-primary transition-colors">关于我们</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="text-lg font-bold mb-4">帮助中心</h4>
-          <ul class="space-y-2">
-            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">家长指南</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">使用帮助</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">常见问题</a></li>
-            <li><a href="#" class="text-gray-400 hover:text-primary transition-colors">联系我们</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h4 class="text-lg font-bold mb-4">关注我们</h4>
-          <p class="text-gray-400 mb-4">扫码关注公众号，获取更多游戏资讯</p>
-          <div class="bg-white p-2 inline-block rounded">
-            <div class="w-32 h-32 bg-gray-200 flex items-center justify-center text-gray-500">
-              <i class="fa fa-qrcode text-4xl"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-        <p>本网站所有游戏均为益智类游戏，建议家长陪同孩子一起玩，合理安排游戏时间</p>
-      </div>
-    </div>
-  </footer>
-
-  <!-- 返回顶部按钮 -->
-  <button id="backToTop" class="fixed bottom-6 right-6 bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg opacity-0 invisible transition-all duration-300 hover:bg-primary/90">
-    <i class="fa fa-arrow-up"></i>
-  </button>
-
-  <script>
-    // 移动端菜单切换
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    
-    menuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-      const icon = menuBtn.querySelector('i');
-      if (icon.classList.contains('fa-bars')) {
-        icon.classList.replace('fa-bars', 'fa-times');
-      } else {
-        icon.classList.replace('fa-times', 'fa-bars');
-      }
-    });
-    
-    // 返回顶部按钮
-    const backToTopBtn = document.getElementById('backToTop');
-    
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 300) {
-        backToTopBtn.classList.remove('opacity-0', 'invisible');
-        backToTopBtn.classList.add('opacity-100', 'visible');
-      } else {
-        backToTopBtn.classList.remove('opacity-100', 'visible');
-        backToTopBtn.classList.add('opacity-0', 'invisible');
-      }
-    });
-    
-    backToTopBtn.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    });
-    
-    // 平滑滚动
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
-        
-        const targetElement = document.querySelector(targetId);
-        if (targetElement) {
-          targetElement.scrollIntoView({
-            behavior: 'smooth'
-          });
-          
-          // 关闭移动端菜单
-          if (!mobileMenu.classList.contains('hidden')) {
-            mobileMenu.classList.add('hidden');
-            const icon = menuBtn.querySelector('i');
-            icon.classList.replace('fa-times', 'fa-bars');
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>好游戏呀</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      });
-    });
-  </script>
+
+        body {
+            /* 保持暖色调背景 */
+            background-color: #fcf8f5; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* 布局容器 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* --- 头部样式：聚焦网站名称，使其年轻、现代、动态 --- */
+        header {
+            text-align: center;
+            margin-bottom: 60px; 
+            padding-top: 20px; 
+        }
+
+        /* 网站名称 - 动态渐变背景文字 */
+        header h1 {
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            margin: 0; 
+            letter-spacing: 2px; 
+            
+            /* 动态渐变背景文字效果 */
+            background: linear-gradient(90deg, #FF6F61 0%, #FFB650 30%, #FF6F61 70%, #DD2476 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% auto; 
+            animation: gradient-shift 6s ease infinite alternate; 
+            display: inline-block; 
+            text-shadow: 0 5px 15px rgba(255, 100, 100, 0.2); 
+        }
+
+        /* 渐变动画 */
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        /* --- 头部样式优化结束 --- */
+
+
+        /* 游戏卡片网格布局 (保持不变) */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+            gap: 20px; 
+        }
+
+        /* 单个卡片样式 (保持不变) */
+        .game-card {
+            background: #ffffff;
+            border-radius: 20px; 
+            padding: 25px 15px; 
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04); 
+            border: 2px solid transparent; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 卡片悬停效果 (保持不变) */
+        .game-card:hover {
+            transform: translateY(-6px) scale(1.02); 
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 游戏图标（Emoji） (保持不变) */
+        .icon {
+            font-size: 3rem; 
+            margin-bottom: 12px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        
+        .game-card:hover .icon {
+            transform: scale(1.1) rotate(5deg); 
+        }
+
+        /* 游戏标题 (保持不变) */
+        .game-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 4px;
+        }
+
+        /* 游戏简介 (保持不变) */
+        .game-desc {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* --- 卡片配色 (保持不变) --- */
+        .card-1:hover { border-color: #FF9F43; box-shadow: 0 10px 20px rgba(255, 159, 67, 0.2); }
+        .card-1:hover .game-title { color: #FF9F43; }
+        .card-2:hover { border-color: #54a0ff; box-shadow: 0 10px 20px rgba(84, 160, 255, 0.2); }
+        .card-2:hover .game-title { color: #54a0ff; }
+        .card-3:hover { border-color: #1dd1a1; box-shadow: 0 10px 20px rgba(29, 209, 161, 0.2); }
+        .card-3:hover .game-title { color: #1dd1a1; }
+        .card-4:hover { border-color: #ff6b6b; box-shadow: 0 10px 20px rgba(255, 107, 107, 0.2); }
+        .card-4:hover .game-title { color: #ff6b6b; }
+        .card-5:hover { border-color: #feca57; box-shadow: 0 10px 20px rgba(254, 202, 87, 0.3); }
+        .card-5:hover .game-title { color: #feca57; }
+        .card-6:hover { border-color: #a55eea; box-shadow: 0 10px 20px rgba(165, 94, 234, 0.2); }
+        .card-6:hover .game-title { color: #a55eea; }
+
+
+        /* 底部版权 */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.8rem;
+            color: #aaa;
+            font-weight: 500;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>好游戏呀</h1>
+        </header>
+
+        <main class="game-grid">
+            <a href="game/calculator24.html" target="_blank" class="game-card card-1">
+                <span class="icon">🔢</span>
+                <h3 class="game-title">24点游戏</h3>
+                <p class="game-desc">快速心算</p>
+            </a>
+            
+            <a href="https://www.baidu.com" target="_blank" class="game-card card-2">
+                <span class="icon">🧱</span>
+                <h3 class="game-title">俄罗斯方块</h3>
+                <p class="game-desc">经典消除</p>
+            </a>
+            <a href="https://www.baidu.com" target="_blank" class="game-card card-3">
+                <span class="icon">🧠</span>
+                <h3 class="game-title">2048</h3>
+                <p class="game-desc">数字合成</p>
+            </a>
+            <a href="https://www.baidu.com" target="_blank" class="game-card card-4">
+                <span class="icon">💣</span>
+                <h3 class="game-title">扫雷专家</h3>
+                <p class="game-desc">推理排雷</p>
+            </a>
+            <a href="https://www.baidu.com" target="_blank" class="game-card card-5">
+                <span class="icon">🐍</span>
+                <h3 class="game-title">贪吃蛇</h3>
+                <p class="game-desc">反应挑战</p>
+            </a>
+            <a href="https://www.baidu.com" target="_blank" class="game-card card-6">
+                <span class="icon">♟️</span>
+                <h3 class="game-title">五子棋</h3>
+                <p class="game-desc">黑白博弈</p>
+            </a>
+        </main>
+
+        <footer>
+            好游戏呀 | haoyouxiya.com © 2024
+        </footer>
+    </div>
+
 </body>
 </html>
