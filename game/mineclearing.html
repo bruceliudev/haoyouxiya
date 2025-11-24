@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫雷 Minesweeper (现代版)</title>
+    <style>
+        /* --- 颜色变量 (现代简约调色板) --- */
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --header-bg: #e9ecef;
+            --cell-closed: #ced4da;
+            --cell-closed-hover: #adb5bd;
+            --cell-open: #f1f3f5;
+            --text-color: #343a40;
+            --accent-color: #007bff;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+            --shadow-light: 0 4px 10px rgba(0,0,0,0.08);
+            --shadow-medium: 0 8px 15px rgba(0,0,0,0.12);
+            --radius-large: 10px;
+            --radius-medium: 6px;
+            --cell-size: 30px; /*稍微调小一点点适配小屏幕*/
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* 修改点：允许最小高度，内容多时自动撑开 */
+            min-height: 100vh; 
+            margin: 0;
+            color: var(--text-color);
+            user-select: none;
+            /* 修改点：允许滚动，增加上下内边距 */
+            overflow-y: auto; 
+            padding: 20px 0; 
+            box-sizing: border-box;
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: var(--text-color);
+            font-size: 2.2em;
+        }
+
+        /* --- 游戏主容器 --- */
+        #game-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            /* 防止专家模式横向太宽撑破布局 */
+            max-width: 95vw; 
+            overflow-x: auto; /* 如果横向太宽允许内部滚动 */
+        }
+
+        /* --- 头部信息栏 --- */
+        #header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: var(--header-bg);
+            border-radius: var(--radius-medium);
+            box-sizing: border-box;
+            min-width: 250px; /* 最小宽度防止头部挤压 */
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: var(--radius-medium);
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 60px;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .stat-icon {
+            font-size: 1.1em;
+            opacity: 0.8;
+        }
+
+        #face-btn {
+            width: 44px;
+            height: 44px;
+            font-size: 1.8em;
+            border: none;
+            background: var(--card-bg);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            flex-shrink: 0; /* 防止被挤压 */
+        }
+        #face-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+        }
+        #face-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* --- 网格区域 --- */
+        #grid {
+            display: grid;
+            gap: 2px; /* 稍微紧凑一点 */
+            background-color: var(--card-bg); 
+            padding: 5px;
+            border-radius: var(--radius-medium);
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            background-color: var(--cell-closed);
+            border-radius: 4px; /* 微圆角 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .cell:hover:not(.revealed) {
+            background-color: var(--cell-closed-hover);
+            z-index: 1; /* 悬浮时层级变高 */
+        }
+        
+        .cell:active:not(.revealed) {
+            transform: scale(0.95);
+        }
+
+        /* 状态样式 */
+        .cell.revealed {
+            background-color: var(--cell-open);
+            cursor: default;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            color: var(--text-color);
+        }
+
+        .cell.flagged {
+            color: var(--danger-color);
+        }
+
+        .cell.mine {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .cell.mine-exploded {
+            background-color: #ff0000;
+            animation: shake 0.5s forwards;
+        }
+        
+        .cell.wrong-flag {
+            background-color: #ffcccc;
+            color: #cc0000;
+        }
+
+        /* 数字颜色 */
+        .num-1 { color: #0000ff; }
+        .num-2 { color: #008000; }
+        .num-3 { color: #ff0000; }
+        .num-4 { color: #000080; }
+        .num-5 { color: #800000; }
+        .num-6 { color: #008080; }
+        .num-7 { color: #000000; }
+        .num-8 { color: #808080; }
+
+        /* --- 控制区 --- */
+        #controls {
+            margin-top: 20px;
+            /* 确保控制区始终显示，不会被挤压 */
+            flex-shrink: 0; 
+            display: flex;
+            background: var(--card-bg);
+            padding: 6px;
+            border-radius: var(--radius-large);
+            box-shadow: var(--shadow-light);
+            /* 防止按钮换行 */
+            white-space: nowrap; 
+        }
+
+        button.difficulty-btn {
+            border: none;
+            background: transparent;
+            padding: 10px 20px;
+            border-radius: var(--radius-medium);
+            cursor: pointer;
+            font-size: 1em;
+            color: var(--text-color);
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        button.difficulty-btn:hover {
+            color: var(--accent-color);
+        }
+
+        button.difficulty-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        /* --- 覆盖层 --- */
+        #game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--radius-large);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 10;
+        }
+
+        #game-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #overlay-message {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+        }
+        #overlay-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        #overlay-restart-btn {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+        }
+
+        #game-overlay.win #overlay-icon, #game-overlay.win #overlay-message { color: var(--success-color); }
+        #game-overlay.win #overlay-restart-btn { background-color: var(--success-color); }
+        
+        #game-overlay.lose #overlay-icon, #game-overlay.lose #overlay-message { color: var(--danger-color); }
+        #game-overlay.lose #overlay-restart-btn { background-color: var(--danger-color); }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>扫雷</h1>
+
+    <div id="game-card">
+        <div id="header">
+            <div class="stat-box" title="剩余雷数">
+                <span class="stat-icon">💣</span>
+                <span id="mines-count">10</span>
+            </div>
+            
+            <button id="face-btn">😀</button>
+            
+            <div class="stat-box" title="用时">
+                <span class="stat-icon">⏱️</span>
+                <span id="timer">0</span>
+            </div>
+        </div>
+        <div id="grid"></div>
+
+        <div id="game-overlay">
+            <div id="overlay-icon"></div>
+            <div id="overlay-message"></div>
+            <button id="overlay-restart-btn">再来一局</button>
+        </div>
+    </div>
+
+    <div id="controls">
+        <button class="difficulty-btn active" onclick="setDifficulty('easy')">初级</button>
+        <button class="difficulty-btn" onclick="setDifficulty('medium')">中级</button>
+        <button class="difficulty-btn" onclick="setDifficulty('hard')">专家</button>
+    </div>
+
+    <script>
+        // --- 游戏配置 ---
+        const config = {
+            easy: { rows: 9, cols: 9, mines: 10 },
+            medium: { rows: 16, cols: 16, mines: 40 },
+            hard: { rows: 16, cols: 30, mines: 99 }
+        };
+
+        let currentLevel = 'easy';
+        let board = [];
+        let isGameOver = false;
+        let isFirstClick = true;
+        let timerInterval = null;
+        let timeElapsed = 0;
+        let minesLeft = 0;
+
+        const gridEl = document.getElementById('grid');
+        const minesCountEl = document.getElementById('mines-count');
+        const timerEl = document.getElementById('timer');
+        const faceBtn = document.getElementById('face-btn');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const gameOverlay = document.getElementById('game-overlay');
+        const overlayMessage = document.getElementById('overlay-message');
+        const overlayIcon = document.getElementById('overlay-icon');
+        const overlayRestartBtn = document.getElementById('overlay-restart-btn');
+
+        function initGame() {
+            stopTimer();
+            timeElapsed = 0;
+            timerEl.innerText = '0';
+            isGameOver = false;
+            isFirstClick = true;
+            faceBtn.innerText = '😀';
+            
+            gameOverlay.classList.remove('visible', 'win', 'lose');
+
+            const { rows, cols, mines } = config[currentLevel];
+            minesLeft = mines;
+            updateMinesCounter();
+
+            gridEl.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+            gridEl.innerHTML = '';
+
+            board = [];
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < cols; c++) {
+                    row.push({
+                        r, c,
+                        isMine: false,
+                        isRevealed: false,
+                        isFlagged: false,
+                        neighborCount: 0
+                    });
+                    
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    
+                    cell.addEventListener('mousedown', handleMouseDown);
+                    cell.addEventListener('mouseup', handleMouseUp);
+                    cell.addEventListener('contextmenu', (e) => e.preventDefault());
+                    
+                    gridEl.appendChild(cell);
+                }
+                board.push(row);
+            }
+        }
+
+        function placeMines(excludeRow, excludeCol) {
+            const { rows, cols, mines } = config[currentLevel];
+            let minesPlaced = 0;
+
+            while (minesPlaced < mines) {
+                const r = Math.floor(Math.random() * rows);
+                const c = Math.floor(Math.random() * cols);
+
+                if (!board[r][c].isMine && (r !== excludeRow || c !== excludeCol)) {
+                    board[r][c].isMine = true;
+                    minesPlaced++;
+                }
+            }
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (!board[r][c].isMine) {
+                        board[r][c].neighborCount = countNeighbors(r, c);
+                    }
+                }
+            }
+        }
+
+        function countNeighbors(r, c) {
+            const { rows, cols } = config[currentLevel];
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    const nr = r + i;
+                    const nc = c + j;
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                        if (board[nr][nc].isMine) count++;
+                    }
+                }
+            }
+            return count;
+        }
+
+        function handleMouseDown(e) {
+            if (isGameOver) return;
+            if (e.button === 0) faceBtn.innerText = '😮';
+        }
+
+        function handleMouseUp(e) {
+            if (isGameOver) return;
+            faceBtn.innerText = '😀';
+            
+            const r = parseInt(e.target.dataset.row);
+            const c = parseInt(e.target.dataset.col);
+            const cellData = board[r][c];
+
+            if (e.button === 0) { 
+                if (cellData.isFlagged) return;
+                
+                if (isFirstClick) {
+                    placeMines(r, c);
+                    isFirstClick = false;
+                    startTimer();
+                }
+                reveal(r, c);
+            } else if (e.button === 2) { 
+                toggleFlag(r, c);
+            }
+        }
+
+        function reveal(r, c) {
+            const { rows, cols } = config[currentLevel];
+            if (r < 0 || r >= rows || c < 0 || c >= cols) return;
+            const cell = board[r][c];
+            
+            if (cell.isRevealed || cell.isFlagged) return;
+
+            cell.isRevealed = true;
+            const cellEl = getCellEl(r, c);
+            cellEl.classList.add('revealed');
+
+            if (cell.isMine) {
+                gameOver(false, r, c);
+                return;
+            }
+
+            if (cell.neighborCount > 0) {
+                cellEl.innerText = cell.neighborCount;
+                cellEl.classList.add(`num-${cell.neighborCount}`);
+            } else {
+                for (let i = -1; i <= 1; i++) {
+                    for (let j = -1; j <= 1; j++) {
+                        reveal(r + i, c + j);
+                    }
+                }
+            }
+            checkWin();
+        }
+
+        function toggleFlag(r, c) {
+            const cell = board[r][c];
+            if (cell.isRevealed) return;
+
+            const cellEl = getCellEl(r, c);
+            if (cell.isFlagged) {
+                cell.isFlagged = false;
+                cellEl.innerText = '';
+                cellEl.classList.remove('flagged');
+                minesLeft++;
+            } else {
+                cell.isFlagged = true;
+                cellEl.innerText = '🚩';
+                cellEl.classList.add('flagged');
+                minesLeft--;
+            }
+            updateMinesCounter();
+        }
+
+        function getCellEl(r, c) {
+            const index = r * config[currentLevel].cols + c;
+            return gridEl.children[index];
+        }
+
+        function gameOver(isWin, triggerR, triggerC) {
+            isGameOver = true;
+            stopTimer();
+
+            if (isWin) {
+                faceBtn.innerText = '😎';
+                minesCountEl.innerText = 'WIN';
+                overlayIcon.innerText = '🎉';
+                overlayMessage.innerText = '恭喜！扫雷成功';
+                gameOverlay.classList.add('visible', 'win');
+                const { rows, cols } = config[currentLevel];
+                for(let r=0; r<rows; r++){
+                    for(let c=0; c<cols; c++){
+                        if(board[r][c].isMine && !board[r][c].isFlagged){
+                            const el = getCellEl(r,c);
+                            el.innerText = '🚩';
+                            el.classList.add('flagged');
+                        }
+                    }
+                }
+            } else {
+                faceBtn.innerText = '😵';
+                overlayIcon.innerText = '💥';
+                overlayMessage.innerText = '游戏结束';
+                gameOverlay.classList.add('visible', 'lose');
+                const { rows, cols } = config[currentLevel];
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        const cell = board[r][c];
+                        const el = getCellEl(r, c);
+                        
+                        if (cell.isMine) {
+                            if (r === triggerR && c === triggerC) {
+                                el.classList.add('mine-exploded');
+                            } else {
+                                el.innerText = '💣';
+                            }
+                            el.classList.add('mine');
+                            el.classList.add('revealed');
+                        } else if (cell.isFlagged) {
+                            el.innerText = '❌';
+                            el.classList.add('wrong-flag'); 
+                            el.classList.add('revealed');
+                        }
+                    }
+                }
+            }
+        }
+
+        function checkWin() {
+            if (isGameOver) return;
+            const { rows, cols, mines } = config[currentLevel];
+            let revealedCount = 0;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (board[r][c].isRevealed) revealedCount++;
+                }
+            }
+            if (revealedCount === (rows * cols - mines)) {
+                gameOver(true);
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            timerInterval = setInterval(() => {
+                timeElapsed++;
+                timerEl.innerText = timeElapsed;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function updateMinesCounter() {
+            minesCountEl.innerText = minesLeft;
+        }
+
+        function setDifficulty(level) {
+            currentLevel = level;
+            difficultyBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="setDifficulty('${level}')"]`).classList.add('active');
+            initGame();
+        }
+
+        faceBtn.addEventListener('click', initGame);
+        overlayRestartBtn.addEventListener('click', initGame);
+        initGame();
+
+    </script>
+</body>
+</html>
